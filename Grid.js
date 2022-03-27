@@ -18,6 +18,10 @@ export default class Grid {
     });
   }
 
+  get cells() {
+    return this.#cells;
+  }
+
   get cellsByCollumn() {
     return this.#cells.reduce((cellGrid, cell) => {
       //No array for this row add an array
@@ -67,8 +71,8 @@ class Cell {
   set mergeTile(value) {
     this.#mergeTile = value;
     if (value == null) return;
-    this.#mergeTile = x;
-    this.#mergeTile = y;
+    this.#mergeTile.x = this.#x;
+    this.#mergeTile.y = this.#y;
   }
 
   get x() {
@@ -93,6 +97,12 @@ class Cell {
       this.tile == null ||
       (this.mergeTile == null && this.tile.value === tile.value)
     );
+  }
+  mergeTiles() {
+    if (this.tile == null || this.mergeTile == null) return;
+    this.tile.value = this.tile.value + this.mergeTile.value;
+    this.mergeTile.removeTile();
+    this.mergeTile = null;
   }
 }
 
