@@ -9,13 +9,33 @@ export default class Grid {
     gridElement.style.setProperty("--grid-size", GRID_SIZE);
     gridElement.style.setProperty("--cell-size", `${CELL_SIZE}vmin`);
     gridElement.style.setProperty("--cell-gap", `${CELL_GAP}vmin`);
-    this.#cells = creatCellElements(gridElement).map((cellElement, index) => {
+    this.#cells = createCellElements(gridElement).map((cellElement, index) => {
       return new Cell(
         cellElement,
         index % GRID_SIZE,
         Math.floor(index / GRID_SIZE)
       );
     });
+  }
+
+  get cellsByCollumn() {
+    return this.#cells.reduce((cellGrid, cell) => {
+      //No array for this row add an array
+      cellGrid[cell.x] = cellGrid[cell.x] || [];
+      // Collums
+      cellGrid[cell.x][cell.y] = cell;
+      return cellGrid;
+    }, []);
+  }
+
+  get cellsByRow() {
+    return this.#cells.reduce((cellGrid, cell) => {
+      //No array for this row add an array
+      cellGrid[cell.y] = cellGrid[cell.y] || [];
+      // Collums
+      cellGrid[cell.y][cell.x] = cell;
+      return cellGrid;
+    }, []);
   }
 
   get #emptyCells() {
@@ -33,11 +53,32 @@ class Cell {
   #x;
   #y;
   #tile;
+  #mergeTile;
   constructor(cellElement, x, y) {
     this.#cellElement = cellElement;
     this.#x = x;
     this.#y = y;
   }
+
+  get mergeTile() {
+    return this.#mergeTile;
+  }
+
+  set mergeTile(value) {
+    this.#mergeTile = value;
+    if (value == null) return;
+    this.#mergeTile = x;
+    this.#mergeTile = y;
+  }
+
+  get x() {
+    return this.#x;
+  }
+
+  get y() {
+    return this.#y;
+  }
+
   get tile() {
     return this.#tile;
   }
@@ -45,11 +86,17 @@ class Cell {
     this.#tile = value;
     if (value == null) return;
     this.#tile.x = this.#x;
-    this.#tile.u = this.#y;
+    this.#tile.y = this.#y;
+  }
+  canAccept(tile) {
+    return (
+      this.tile == null ||
+      (this.mergeTile == null && this.tile.value === tile.value)
+    );
   }
 }
 
-function creatCellElements(gridElement) {
+function createCellElements(gridElement) {
   const cells = [];
   for (let i = 0; i < GRID_SIZE * GRID_SIZE; i++) {
     const cell = document.createElement("div");
